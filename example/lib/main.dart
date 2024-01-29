@@ -3,6 +3,8 @@ import 'dart:async';
 
 import 'package:flutter/services.dart';
 
+import 'components/components.dart';
+
 void main() {
   runApp(const MyApp());
 }
@@ -20,6 +22,10 @@ class _MyAppState extends State<MyApp> {
     super.initState();
   }
 
+  TextEditingController textController= TextEditingController();
+  RemindMoney remind= RemindMoney();
+  List<int> listMoney = [];
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -27,10 +33,52 @@ class _MyAppState extends State<MyApp> {
         appBar: AppBar(
           title: const Text('Plugin example app'),
         ),
-        body: Center(
-          child: Text('Running on: \n'),
-        ),
+        body: Column(
+          children: [
+            TextFormField(
+              controller: textController,
+              keyboardType: TextInputType.number,
+              onChanged: (value) {
+                listMoney= RemindMoney.setShowRemind(value, listMoney);
+                setState(() {});
+              },
+            ),
+            buildRemindMoney(),
+          ],
+        )
       ),
     );
+  }
+
+  Widget buildRemindMoney(){
+    return listMoney.isNotEmpty
+      ? Wrap(
+          children: List.generate(
+          listMoney.length,
+          (index) => InkWell(
+            onTap: () {
+              setMoneyInput(index);
+              listMoney.clear();
+              setState(() {});
+            },
+            child: Padding(
+              padding: const EdgeInsets.only(right: 16),
+              child: Chip(
+                label: Text(
+                  AppCurrencyFormat.formatMoneyD(
+                    listMoney[index],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ))
+      : const SizedBox();
+  }
+
+  void setMoneyInput(int index){
+    textController.text=AppCurrencyFormat.formatMoneyD(listMoney[index]);
+    listMoney=[];
+    setState(() {});
   }
 }
